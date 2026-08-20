@@ -54,6 +54,25 @@ input,select,button{font-family:inherit}
 .home-card .hc-desc{font-size:11.5px;color:#999;line-height:1.55}
 .home-nota{margin-top:24px;padding:12px 15px;background:#111;border:1px solid #1e1e1e;border-radius:9px;font-size:11.5px;color:#888;line-height:1.6}
 
+/* ── CHECK-IN DE DOIS DIAS ── */
+#cred-dia{display:none;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.dia-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.5px;color:#888;text-transform:uppercase}
+.dia-btn{display:flex;flex-direction:column;align-items:flex-start;gap:1px;background:#161616;border:1px solid #2e2e2e;border-radius:9px;padding:7px 14px;cursor:pointer;transition:all .15s}
+.dia-btn:hover{border-color:#3d3d3d;background:#1b1b1b}
+.dia-btn .dia-num{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:#bbb;letter-spacing:1px}
+.dia-btn .dia-data{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#777}
+.dia-btn.ativo{background:#0a2040;border-color:#3b82f6;box-shadow:0 0 14px #3b82f633}
+.dia-btn.ativo .dia-num{color:#93c5fd}
+.dia-btn.ativo .dia-data{color:#60a5fa}
+.dia-aviso{flex:1 1 100%;background:#1f1400;border:1px solid #f59e0b66;border-radius:8px;padding:8px 12px;font-size:11.5px;color:#fbbf24}
+.dia-aviso.neutro{background:#141414;border-color:#2a2a2a;color:#999}
+.btn-checkin{width:100%;padding:11px;background:#1a1a1a;border:1px solid #383838;border-radius:8px;color:#e0e0e0;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-checkin:hover{background:#222;border-color:#22c55e66}
+.btn-checkin.feito{background:#0d2116;border-color:#22c55e66;color:#4ade80}
+.btn-outro-dia{width:100%;margin-top:6px;padding:7px;background:transparent;border:1px dashed #333;border-radius:7px;color:#888;font-size:11px;cursor:pointer;transition:all .15s}
+.btn-outro-dia:hover{border-color:#444;color:#bbb;background:#161616}
+.btn-outro-dia.feito{border-style:solid;border-color:#22c55e44;color:#4ade80;background:#0d21160f}
+
 /* ── BOTÃO WHATSAPP ── */
 .btn-wpp{display:inline-flex;align-items:center;justify-content:center;gap:4px;background:#0d2116;border:1px solid #22c55e55;border-radius:6px;padding:3px 8px;color:#4ade80;font-size:10px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .12s;white-space:nowrap;line-height:1.5}
 .btn-wpp:hover{background:#14361f;border-color:#22c55e99}
@@ -130,6 +149,10 @@ input,select,button{font-family:inherit}
   #modal{width:94vw;padding:20px}
   #modal-edit-bg > div{width:94vw!important;padding:18px!important}
   #cred-list{grid-template-columns:1fr!important}
+  #cred-dia{gap:6px}
+  .dia-btn{flex:1;padding:10px 12px;align-items:center}
+  .btn-checkin{padding:14px;font-size:14px}
+  .btn-outro-dia{padding:10px;font-size:12px}
   #mambers-list{grid-template-columns:1fr!important}
   .home-grid{grid-template-columns:1fr}
   .home-title{font-size:24px}
@@ -716,6 +739,8 @@ tbody tr.row-mdl td .lead-name{color:#fff}
             <option value="SP (AGO) VIP">São Paulo Agosto VIP — SP (AGO) VIP</option>
             <option value="RIB">Ribeirão Preto — RIB</option>
             <option value="RIB VIP">Ribeirão Preto VIP — RIB VIP</option>
+            <option value="SJC">São José dos Campos — SJC</option>
+            <option value="SJC VIP">São José dos Campos VIP — SJC VIP</option>
           </select>
           <div id="lote-aviso-cidade" style="margin-top:6px;font-size:10px;color:#f59e0b;display:none">⚠️ Selecione uma cidade antes de continuar.</div>
         </div>
@@ -799,6 +824,7 @@ tbody tr.row-mdl td .lead-name{color:#fff}
         <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:#f0f0f0">🪪 Check-in do Evento</div>
         <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#aaa" id="cred-count">—</div>
       </div>
+      <div id="cred-dia"></div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
         <select id="cred-cidade" data-eventos="normal" data-placeholder="Todas as cidades" onchange="renderCred()" style="background:#161616;border:1px solid #383838;border-radius:6px;padding:7px 12px;color:#e4e4e4;font-size:12px;outline:none">
           <option value="">Todas as cidades</option>
@@ -1068,7 +1094,8 @@ tbody tr.row-mdl td .lead-name{color:#fff}
           <option value="JOI">Joinville (Inscrito)</option><option value="JOI VIP">Joinville (VIP)</option>
           <option value="CAP">Campinas (Inscrito)</option><option value="CAP VIP">Campinas (VIP)</option>
           <option value="SP (AGO)">São Paulo Agosto (Inscrito)</option><option value="SP (AGO) VIP">São Paulo Agosto (VIP)</option>
-          <option value="RIB" selected>Ribeirão Preto (Inscrito)</option><option value="RIB VIP">Ribeirão Preto (VIP)</option>
+          <option value="RIB">Ribeirão Preto (Inscrito)</option><option value="RIB VIP">Ribeirão Preto (VIP)</option>
+          <option value="SJC" selected>São José dos Campos (Inscrito)</option><option value="SJC VIP">São José dos Campos (VIP)</option>
         </select>
       </div>
     </div>
@@ -1094,7 +1121,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbz7WsdK30AOxWG-R2FwTAiG
 
 // Ações disponíveis na API (precisam existir no Code.gs)
 const ACOES_API = ['getLeadsPacked','getVendasPacked','getVendasCarimbo','getMambersConferencia',
-  'setCelulaVerificado','appendHistorico','atualizarLead','adicionarLeadManual','excluirLead',
+  'setCelulaVerificado','setCheckinDia','appendHistorico','atualizarLead','adicionarLeadManual','excluirLead',
   'atribuirResponsavelEmLote','adicionarMamberComoVip','getEventosInfo','ping'];
 
 let sessaoToken = '', sessaoEmail = '';
@@ -1258,6 +1285,7 @@ const ABA_COLORS={
   'CAP':'#ec4899','CAP VIP':'#f472b6',
   'SP (AGO)':'#84cc16','SP (AGO) VIP':'#a3e635',
   'RIB':'#14b8a6','RIB VIP':'#5eead4',
+  'SJC':'#f43f5e','SJC VIP':'#fb7185',
 };
 const ABA_LABELS={
   'CWB':'Curitiba','CWB VIP':'CWB VIP','SP':'São Paulo','SP VIP':'SP VIP',
@@ -1267,8 +1295,9 @@ const ABA_LABELS={
   'CAP':'Campinas','CAP VIP':'CAP VIP',
   'SP (AGO)':'São Paulo (Ago)','SP (AGO) VIP':'SP (AGO) VIP',
   'RIB':'Ribeirão Preto','RIB VIP':'RIB VIP',
+  'SJC':'São José dos Campos','SJC VIP':'SJC VIP',
 };
-const ABAS=['CWB','SP','GO','RJ','FOR','MA','JOI','CAP','SP (AGO)','RIB','CWB VIP','SP VIP','GO VIP','RJ VIP','FOR VIP','MA VIP','JOI VIP','CAP VIP','SP (AGO) VIP','RIB VIP'];
+const ABAS=['CWB','SP','GO','RJ','FOR','MA','JOI','CAP','SP (AGO)','RIB','SJC','CWB VIP','SP VIP','GO VIP','RJ VIP','FOR VIP','MA VIP','JOI VIP','CAP VIP','SP (AGO) VIP','RIB VIP','SJC VIP'];
 
 const CANAIS=[
   {value:'Sim, confirmou por telefone',   label:'📞 Telefone',  cls:'s-canal'},
@@ -1705,8 +1734,8 @@ function confirmadosDoLead(l) {
 // Quantas dessas pessoas estão PRESENTES (check-in individual)
 function presentesDoLead(l) {
   let n = 0;
-  if (l.presencial === 'Sim') n += 1;
-  if (l.tipo === 'VIP' && l.segundoNome && l.segundoPresente === 'Sim') n += 1;
+  if (presenteEmAlgumDia(l)) n += 1;
+  if (l.tipo === 'VIP' && l.segundoNome && segundoPresenteEmAlgumDia(l)) n += 1;
   return n;
 }
 // Soma uma métrica por-pessoa sobre uma lista
@@ -2371,7 +2400,7 @@ function salvarLead(){
 
 // ── ANALYTICS ────────────────────────────────────────────────────
 function renderAnalytics(){
-  const KEYS=['CWB','SP','GO','RJ','FOR','MA','JOI','CAP','SP (AGO)','RIB'];
+  const KEYS=['CWB','SP','GO','RJ','FOR','MA','JOI','CAP','SP (AGO)','RIB','SJC'];
   const activeLeads=allLeads.filter(l=>!isUpgraded(l));
   const total=somaPessoas(activeLeads,pessoasDoLead);
   const conf=somaPessoas(activeLeads,confirmadosDoLead);
@@ -2448,7 +2477,7 @@ function buildCityFilterBtns(containerId, stateVar, onChangeFn) {
     ['CWB','Curitiba','#3b82f6'],['SP','São Paulo','#a855f7'],
     ['GO','Goiânia','#f59e0b'],['RJ','Rio','#ef4444'],['FOR','Fortaleza','#06b6d4'],
     ['MA','Manaus','#10b981'],['JOI','Joinville','#f97316'],['CAP','Campinas','#ec4899'],
-    ['SP (AGO)','SP (Ago)','#84cc16'],['RIB','Ribeirão Preto','#14b8a6']];
+    ['SP (AGO)','SP (Ago)','#84cc16'],['RIB','Ribeirão Preto','#14b8a6'],['SJC','S. J. dos Campos','#f43f5e']];
   opts.forEach(([v,l,c])=>{
     const btn=document.createElement('button');
     btn.dataset.cityVal=v;
@@ -3538,6 +3567,170 @@ function salvarModalEdicao() {
     .atualizarLead(lead.sheetName, lead.rowIndex, campos, identAntes);
 }
 
+// ═════════════════════════════════════════════════════════════
+// CHECK-IN DE DOIS DIAS
+// Os eventos novos duram 2 dias. O dash escolhe sozinho o dia de hoje,
+// deixa bem visível qual está sendo marcado e avisa quando o dia escolhido
+// não é o de hoje.
+// ═════════════════════════════════════════════════════════════
+let diaCheckin = 0;   // 0 = ainda não escolhido, 1 ou 2 = dia selecionado
+
+function ehSim(v){ return (v||'').toString().trim().toLowerCase()==='sim'; }
+function presenteEmAlgumDia(l){ return l.presencial==='Sim' || ehSim(l.dia1) || ehSim(l.dia2); }
+function segundoPresenteEmAlgumDia(l){ return l.segundoPresente==='Sim' || ehSim(l.dia1Seg) || ehSim(l.dia2Seg); }
+function presenteNoDia(l, dia){
+  const v = dia===2 ? l.dia2 : l.dia1;
+  if (ehSim(v)) return true;
+  // evento de 1 dia (ou coluna ainda não criada): usa a marcação antiga
+  if (!temColunaDia(l)) return l.presencial==='Sim';
+  return false;
+}
+function segundoPresenteNoDia(l, dia){
+  const v = dia===2 ? l.dia2Seg : l.dia1Seg;
+  if (ehSim(v)) return true;
+  if (!temColunaDiaSeg(l)) return l.segundoPresente==='Sim';
+  return false;
+}
+function temColunaDia(l){ return (l.dia1Col>0) || (l.dia2Col>0); }
+function temColunaDiaSeg(l){ return (l.dia1SegCol>0) || (l.dia2SegCol>0); }
+
+function hojeISO(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function dataCurta(iso){ const p=(iso||'').split('-'); return p.length===3 ? p[2]+'/'+p[1] : (iso||''); }
+
+// Qual evento manda no seletor de dia (a cidade escolhida no filtro, ou o
+// evento ativo de 2 dias que combina com hoje).
+function eventoDoCheckin(){
+  const c=(document.getElementById('cred-cidade')||{}).value||'';
+  if(c && eventosInfo[c]) return {key:c, info:eventosInfo[c]};
+  const hoje=hojeISO();
+  const ativos=Object.keys(eventosInfo).filter(k=>k.indexOf('VIP')<0 && eventosInfo[k].ativo && eventosInfo[k].doisDias);
+  const doDia=ativos.find(k=>eventosInfo[k].dia1===hoje||eventosInfo[k].dia2===hoje);
+  const k=doDia||ativos[0];
+  return k ? {key:k, info:eventosInfo[k]} : null;
+}
+function diaDeHoje(info){
+  const hoje=hojeISO();
+  if(!info) return 0;
+  if(info.dia2===hoje) return 2;
+  if(info.dia1===hoje) return 1;
+  return 0;
+}
+function garantirDiaSelecionado(){
+  const ev=eventoDoCheckin();
+  if(!ev || !ev.info.doisDias){ diaCheckin=1; return ev; }
+  if(!diaCheckin){ diaCheckin = diaDeHoje(ev.info) || 1; }
+  return ev;
+}
+function escolherDia(d){ diaCheckin=d; renderCred(); }
+
+// Barra do topo do check-in: qual dia está sendo marcado + aviso de dia errado
+function renderBarraDia(){
+  const el=document.getElementById('cred-dia');
+  if(!el) return;
+  const ev=garantirDiaSelecionado();
+  if(!ev || !ev.info.doisDias){ el.innerHTML=''; el.style.display='none'; return; }
+  el.style.display='flex';
+  const info=ev.info, hoje=diaDeHoje(info);
+  const btn=(d)=>{
+    const ativo=diaCheckin===d, ehHoje=hoje===d;
+    return '<button class="dia-btn'+(ativo?' ativo':'')+'" onclick="escolherDia('+d+')">'+
+      '<span class="dia-num">DIA '+d+'</span>'+
+      '<span class="dia-data">'+dataCurta(d===2?info.dia2:info.dia1)+(ehHoje?' · hoje':'')+'</span></button>';
+  };
+  const aviso = (hoje && hoje!==diaCheckin)
+    ? '<div class="dia-aviso">⚠ Hoje é o <strong>Dia '+hoje+'</strong> — você está marcando presença do <strong>Dia '+diaCheckin+'</strong>.</div>'
+    : (!hoje ? '<div class="dia-aviso neutro">Hoje não é dia de evento — as marcações vão para o <strong>Dia '+diaCheckin+'</strong>.</div>' : '');
+  el.innerHTML = '<div class="dia-label">Marcando o check-in de:</div>'+btn(1)+btn(2)+aviso;
+}
+
+// Confirma quando a pessoa marca um dia que não é o de hoje
+function confirmarDiaErrado(dia){
+  const ev=eventoDoCheckin();
+  if(!ev || !ev.info.doisDias) return true;
+  const hoje=diaDeHoje(ev.info);
+  if(!hoje || hoje===dia) return true;
+  return confirm('Atenção: hoje é o DIA ' + hoje + ' do evento.\n\n' +
+    'Você está marcando presença no DIA ' + dia + ' (' + dataCurta(dia===2?ev.info.dia2:ev.info.dia1) + ').\n\n' +
+    'Confirma mesmo assim?');
+}
+
+// Grava a presença de um dia (comprador ou 2º participante)
+function marcarDia(uid, dia, valor, segundo){
+  const lead=findLead(uid);
+  if(!lead) return;
+  const colDia = segundo ? (dia===2?lead.dia2SegCol:lead.dia1SegCol) : (dia===2?lead.dia2Col:lead.dia1Col);
+  if(!colDia || colDia<1){
+    toast('A coluna do Dia '+dia+' não existe nesta aba — rode garantirColunasCheckin() no editor','err');
+    return;
+  }
+  if(valor && !confirmarDiaErrado(dia)) return;
+  if(!navigator.onLine){ avisarConexao('⚠ SEM INTERNET — o check-in de "'+lead.nome+'" NÃO foi salvo.'); return; }
+
+  const campo = segundo ? (dia===2?'dia2Seg':'dia1Seg') : (dia===2?'dia2':'dia1');
+  const anterior = lead[campo];
+  const anteriorPres = segundo ? lead.segundoPresente : lead.presencial;
+  lead[campo] = valor ? 'Sim' : '';
+  // reflete na coluna antiga (presença geral), como o servidor faz
+  const outro = segundo ? (dia===2?lead.dia1Seg:lead.dia2Seg) : (dia===2?lead.dia1:lead.dia2);
+  const geral = (valor || ehSim(outro)) ? 'Sim' : '';
+  if(segundo) lead.segundoPresente = geral; else lead.presencial = geral;
+  updateStats(); renderCred();
+
+  google.script.run
+    .withSuccessHandler(function(res){
+      if(res && res.ok){
+        if(res.rowIndex && res.rowIndex!==lead.rowIndex) lead.rowIndex=res.rowIndex;
+        if(valor){ showBigCheck(); toast('✓ Dia '+dia+' — '+lead.nome, 'ok'); }
+        else toast('Check-in do Dia '+dia+' removido','neutral');
+      } else {
+        lead[campo]=anterior;
+        if(segundo) lead.segundoPresente=anteriorPres; else lead.presencial=anteriorPres;
+        updateStats(); renderCred();
+        toast('Erro: '+((res&&res.msg)||'não salvou'),'err');
+      }
+    })
+    .withFailureHandler(function(e){
+      lead[campo]=anterior;
+      if(segundo) lead.segundoPresente=anteriorPres; else lead.presencial=anteriorPres;
+      updateStats(); renderCred();
+      avisarConexao('⚠ FALHA ao salvar o check-in de "'+lead.nome+'": '+((e&&e.message)||'sem conexão')+'. NÃO foi salvo!');
+    })
+    .setCheckinDia({
+      sheetName: lead.sheetName, rowIndex: lead.rowIndex, dia: dia,
+      valor: valor ? 'Sim' : '', segundo: !!segundo,
+      cols: { dia1: lead.dia1Col, dia2: lead.dia2Col, dia1Seg: lead.dia1SegCol, dia2Seg: lead.dia2SegCol,
+              presencial: lead.presencialCol, presencialSeg: lead.segundoPresenteCol },
+      ident: identDo(lead),
+    });
+}
+
+// Botões de presença do cartão — 2 dias quando o evento tem 2 dias
+function htmlCheckinCartao(lead, uid, segundo){
+  const doisDias = (eventosInfo[lead.abaKey] && eventosInfo[lead.abaKey].doisDias) &&
+                   (segundo ? temColunaDiaSeg(lead) : temColunaDia(lead));
+  if(!doisDias){
+    // evento de 1 dia: continua exatamente como era
+    const p = segundo ? lead.segundoPresente==='Sim' : lead.presencial==='Sim';
+    const fn = segundo ? 'checkinSegCred' : 'checkinCred';
+    return p
+      ? '<button onclick="'+fn+'(\''+uid+'\',\'\')" class="btn-checkin feito">✓ Presente — check-in feito</button>'
+      : '<button onclick="'+fn+'(\''+uid+'\',\'Sim\')" class="btn-checkin">Marcar presença</button>';
+  }
+  const dSel = diaCheckin===2 ? 2 : 1;
+  const dOut = dSel===2 ? 1 : 2;
+  const marcadoSel = segundo ? segundoPresenteNoDia(lead,dSel) : presenteNoDia(lead,dSel);
+  const marcadoOut = segundo ? segundoPresenteNoDia(lead,dOut) : presenteNoDia(lead,dOut);
+  const seg = segundo ? 'true' : 'false';
+  return (marcadoSel
+      ? '<button onclick="marcarDia(\''+uid+'\','+dSel+',\'\','+seg+')" class="btn-checkin feito">✓ Presente no Dia '+dSel+'</button>'
+      : '<button onclick="marcarDia(\''+uid+'\','+dSel+',\'Sim\','+seg+')" class="btn-checkin">Marcar presença · <strong>Dia '+dSel+'</strong></button>')
+    + '<button onclick="marcarDia(\''+uid+'\','+dOut+',\''+(marcadoOut?'':'Sim')+'\','+seg+')" class="btn-outro-dia'+(marcadoOut?' feito':'')+'">'
+    + 'Dia '+dOut+': '+(marcadoOut?'✓ presente':'—')+'</button>';
+}
+
 // ── VIEW CREDENCIAMENTO (CHECK-IN) ──────────────────────────
 function getCredFiltered() {
   const cidade = (document.getElementById('cred-cidade') || {}).value || '';
@@ -3553,8 +3746,8 @@ function getCredFiltered() {
     }
     if (tipo === 'normal' && l.tipo === 'VIP') return false;
     if (tipo === 'vip'    && l.tipo !== 'VIP') return false;
-    if (status === 'presente' && l.presencial !== 'Sim') return false;
-    if (status === 'ausente'  && l.presencial === 'Sim') return false;
+    if (status === 'presente' && !presenteEmAlgumDia(l)) return false;
+    if (status === 'ausente'  && presenteEmAlgumDia(l)) return false;
     if (q) {
       // inclui nome/email/telefone do 2º participante e acompanhante
       if (!leadMatchesQuery(l, q)) return false;
@@ -3570,10 +3763,24 @@ function renderCred() {
   if (!list) return;
   renderStatsContexto();   // lateral acompanha os filtros do Check-in
 
+  renderBarraDia();
   const leads = getCredFiltered();
   const presentes = somaPessoas(leads, presentesDoLead);
 
-  if (count) count.textContent = leads.length + ' participantes · ' + presentes + ' já fizeram check-in';
+  if (count) {
+    const ev = eventoDoCheckin();
+    let txt = leads.length + ' participantes · ' + presentes + ' já fizeram check-in';
+    if (ev && ev.info.doisDias) {
+      let d1 = 0, d2 = 0;
+      leads.forEach(function (l) {
+        if (presenteNoDia(l, 1)) d1++;
+        if (presenteNoDia(l, 2)) d2++;
+        if (l.tipo === 'VIP' && l.segundoNome) { if (segundoPresenteNoDia(l, 1)) d1++; if (segundoPresenteNoDia(l, 2)) d2++; }
+      });
+      txt = leads.length + ' participantes · Dia 1: ' + d1 + ' · Dia 2: ' + d2;
+    }
+    count.textContent = txt;
+  }
 
   list.innerHTML = '';
   if (!leads.length) {
@@ -3631,9 +3838,7 @@ function renderCred() {
         '<span class="conf-pill ' + cp.pillCls + '">' + cp.pillLabel + '</span>' +
         clientBadges(lead) +
       '</div>' +
-      (isPresente
-        ? '<button onclick="checkinCred(\'' + uid + '\',\'\')" style="width:100%;padding:10px;background:#0d2116;border:1px solid #22c55e66;border-radius:8px;color:#4ade80;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Presente — check-in feito</button>'
-        : '<button onclick="checkinCred(\'' + uid + '\',\'Sim\')" style="width:100%;padding:10px;background:#1a1a1a;border:1px solid #383838;border-radius:8px;color:#e0e0e0;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s" onmouseover="this.style.background=\'#222\';this.style.borderColor=\'#22c55e66\'" onmouseout="this.style.background=\'#1a1a1a\';this.style.borderColor=\'#383838\'">Marcar presença</button>');
+      htmlCheckinCartao(lead, uid, false);
 
     if (lead.segundoNome) {
       const segPres = lead.segundoPresente === 'Sim';
@@ -3641,10 +3846,8 @@ function renderCred() {
         '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #262626">' +
         '<div style="font-size:10px;color:#888;font-family:IBM Plex Mono,monospace;margin-bottom:6px">2º PARTICIPANTE</div>' +
         '<div style="font-size:12px;color:#ddd;margin-bottom:8px">' + esc(lead.segundoNome) + '</div>' +
-        (lead.segundoPresenteCol >= 1
-          ? (segPres
-            ? '<button onclick="checkinSegCred(\'' + uid + '\',\'\')" style="width:100%;padding:8px;background:#0d2116;border:1px solid #22c55e66;border-radius:7px;color:#4ade80;font-size:12px;font-weight:600;cursor:pointer">✓ 2º Presente — check-in feito</button>'
-            : '<button onclick="checkinSegCred(\'' + uid + '\',\'Sim\')" style="width:100%;padding:8px;background:#1a1a1a;border:1px solid #383838;border-radius:7px;color:#e0e0e0;font-size:12px;font-weight:600;cursor:pointer">Marcar presença do 2º</button>')
+        ((lead.segundoPresenteCol >= 1 || temColunaDiaSeg(lead))
+          ? htmlCheckinCartao(lead, uid, true)
           : '<span style="font-size:10px;color:#666">Coluna de presença do 2º indisponível</span>') +
         '</div>';
     }
