@@ -1121,7 +1121,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbz7WsdK30AOxWG-R2FwTAiG
 
 // Ações disponíveis na API (precisam existir no Code.gs)
 const ACOES_API = ['getLeadsPacked','getVendasPacked','getVendasCarimbo','getMambersConferencia',
-  'setCelulaVerificado','setCheckinDia','appendHistorico','atualizarLead','adicionarLeadManual','excluirLead',
+  'setCelulaVerificado','setCheckinDia','sessaoOk','appendHistorico','atualizarLead','adicionarLeadManual','excluirLead',
   'atribuirResponsavelEmLote','adicionarMamberComoVip','getEventosInfo','ping'];
 
 let sessaoToken = '', sessaoEmail = '';
@@ -1212,9 +1212,26 @@ function entrar(){
 }
 function encerrarSessao(expirou){
   sessaoToken = '';
-  try { localStorage.removeItem('otr_token'); } catch(e){}
-  mostrarLogin(expirou ? 'Sua sessão expirou. Entre novamente.' : '');
+  // apaga o token E a cópia local dos dados — se a sessão foi derrubada
+  // (troca de senha, por exemplo), nada de cliente fica guardado no aparelho.
+  try {
+    localStorage.removeItem('otr_token');
+    localStorage.removeItem('otr_cache_leads');
+    localStorage.removeItem('otr_cache_ev');
+    localStorage.removeItem('otr_cache_hora');
+  } catch(e){}
+  allLeads = []; allVendas = []; jaIniciou = false;
+  mostrarLogin(expirou ? 'Sua sessão foi encerrada. Entre novamente com a senha atual.' : '');
 }
+
+// Ao voltar para a aba, confere se a sessão ainda vale. Assim, quem estiver
+// com o dash aberto quando a senha for trocada é mandado para o login sem
+// precisar clicar em nada.
+function conferirSessao(){
+  if (!sessaoToken) return;
+  google.script.run.withFailureHandler(function(){}).sessaoOk();
+}
+document.addEventListener('visibilitychange', function(){ if (!document.hidden) conferirSessao(); });
 function abrirDash(){
   const t = document.getElementById('tela-login'); if (t) t.style.display = 'none';
   const app = document.getElementById('app'); if (app) app.style.display = 'flex';
@@ -1537,10 +1554,14 @@ function init() {
   setView('home');           // abre na tela inicial, não na lista de leads
   // Monitor de conexão — avisa quando a internet cair ou voltar (resolve o
   // problema do check-in que "parecia salvo" mas não era, sem internet).
-  window.addEventListener('offline', mostrarBannerOffline);
-  window.addEventListener('online',  esconderBannerOffline);
+  // Só registra uma vez (quem sai e entra de novo não duplica os eventos).
+  if (!window.__ouvintes) {
+    window.__ouvintes = true;
+    window.addEventListener('offline', mostrarBannerOffline);
+    window.addEventListener('online',  esconderBannerOffline);
+    document.getElementById('search').addEventListener('input',e=>{searchQuery=e.target.value;render();});
+  }
   if (!navigator.onLine) mostrarBannerOffline();
-  document.getElementById('search').addEventListener('input',e=>{searchQuery=e.target.value;render();});
 
   const loadEl = document.getElementById('loading');
 
