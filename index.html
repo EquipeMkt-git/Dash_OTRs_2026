@@ -1254,11 +1254,25 @@ const avState={mqlCity:'all',convCity:'all'};
 // google.script.run para milhares de leads.
 function desempacotarLeads(s){
   const p=JSON.parse(s||'{}');
-  const f=p.f||[], r=p.r||[];
+  const f=p.f||[], r=p.r||[], cols=p.cols||{};
   if(p.ev) eventosInfo = p.ev;           // calendário dos eventos vem junto
-  return r.map(function(row){ const o={}; for(let i=0;i<f.length;i++) o[f[i]]=row[i]; return o; });
+  temPassadosCarregados = (p.soAtivos === false);
+  return r.map(function(row){
+    const o={};
+    for(let i=0;i<f.length;i++) o[f[i]]=row[i];
+    // os dados iguais para a aba inteira (nome da aba, tipo e posição das
+    // colunas) vêm só uma vez no pacote — aqui cada lead recebe a sua cópia
+    const c=cols[o.abaKey];
+    if(c) for(const k in c) o[k]=c[k];
+    return o;
+  });
 }
-function carregarLeads(onOk,onErr){
+// soAtivos=true (padrão) traz só os eventos que ainda estão rodando — é o que
+// deixa o carregamento rápido. Os eventos passados só são buscados quando
+// alguém clica em "eventos passados".
+function carregarLeads(onOk,onErr,soAtivos){
+  // se os eventos passados já foram carregados, as recargas seguintes mantêm eles
+  const ativos = (soAtivos === undefined) ? !temPassadosCarregados : !!soAtivos;
   google.script.run
     .withSuccessHandler(function(s){
       let leads;
@@ -1266,14 +1280,8 @@ function carregarLeads(onOk,onErr){
       catch(e){ if(onErr)onErr(e); return; }
       onOk(leads);
     })
-    .withFailureHandler(function(){
-      // fallback: backend antigo (sem getLeadsPacked) — usa o formato clássico
-      google.script.run
-        .withSuccessHandler(function(d){ onOk(d||[]); })
-        .withFailureHandler(function(e2){ if(onErr)onErr(e2); })
-        .getLeads();
-    })
-    .getLeadsPacked();
+    .withFailureHandler(function(e){ if(onErr)onErr(e); })
+    .getLeadsPacked(ativos);
 }
 // Identidade do lead (email/telefone/nome) — enviada em TODA gravação para o
 // servidor conferir se a linha ainda é da pessoa certa (fix do bug de check-in
@@ -1398,7 +1406,7 @@ function parseUpgrade(raw) {
 
 // ── EVENTOS ATIVOS × PASSADOS ────────────────────────────────
 // eventosInfo chega junto com os leads (fonte única: EVENTOS_INFO no Code.gs)
-let eventosInfo = {}, mostrarPassados = false;
+let eventosInfo = {}, mostrarPassados = false, temPassadosCarregados = false;
 function eventoAtivo(abaKey){
   const i = eventosInfo[abaKey];
   return i ? !!i.ativo : true;   // sem cadastro = trata como ativo
@@ -1416,6 +1424,24 @@ function eventoData(abaKey){
 function abasVisiveis(){ return ABAS.filter(a => mostrarPassados || eventoAtivo(a)); }
 function alternarPassados(){
   mostrarPassados = !mostrarPassados;
+  // Para abrir rápido, o dash carrega só os eventos que ainda estão rodando.
+  // Na primeira vez que alguém pede os antigos, buscamos o histórico completo.
+  if (mostrarPassados && !temPassadosCarregados) {
+    mostrarCarregando('buscando os eventos passados…');
+    carregarLeads(function(d){
+      esconderCarregando();
+      allLeads = d || [];
+      temPassadosCarregados = true;
+      buildNav(); atualizarSelectsEventos(); updateStats(); render();
+      buildNavResp(); populateCloserFilter();
+      toast('Eventos passados carregados','neutral');
+    }, function(e){
+      esconderCarregando();
+      mostrarPassados = false; buildNav();
+      toast('Não consegui carregar os eventos passados: '+((e&&e.message)||'falha'),'err');
+    }, false);
+    return;
+  }
   buildNav();
   atualizarSelectsEventos();
   updateStats();
@@ -1642,8 +1668,10 @@ function buildNav(){
   if(qtdPassados){
     const alt=document.createElement('button');
     alt.className='nav-btn'; alt.style.setProperty('--c','#555');
+    const rotulo = mostrarPassados ? '▲ ocultar eventos passados'
+      : ('▼ eventos passados (' + qtdPassados + ')' + (temPassadosCarregados ? '' : ' · carrega ao clicar'));
     alt.innerHTML='<span class="nav-left"><span class="nav-dot"></span><span class="nav-label" style="color:#888">'+
-      (mostrarPassados?'▲ ocultar eventos passados':'▼ eventos passados ('+qtdPassados+')')+'</span></span><span class="nav-count"></span>';
+      rotulo+'</span></span><span class="nav-count"></span>';
     alt.addEventListener('click',alternarPassados);
     ev.appendChild(alt);
   }
