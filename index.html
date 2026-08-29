@@ -526,7 +526,7 @@ tbody tr.row-mdl td .lead-name{color:#fff}
     <div class="stats-row stats-3">
       <div class="stat-card"><div class="stat-num" id="stat-total" style="color:#e4e4e4">0</div><div class="stat-lbl">inscritos</div></div>
       <div class="stat-card"><div class="stat-num" id="stat-conf" style="color:#22c55e">0</div><div class="stat-lbl">confirm.</div></div>
-      <div class="stat-card"><div class="stat-num" id="stat-pres" style="color:#60a5fa">0</div><div class="stat-lbl">presentes</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-pres" style="color:#60a5fa">0</div><div class="stat-lbl" id="stat-pres-lbl">presentes</div></div>
     </div>
     <div style="margin-bottom:8px;padding:6px 10px;background:#0a1e30;border:1px solid #1e3a5f;border-radius:6px;font-size:10px;color:#60a5fa" id="stat-conf-cred">🪪 0 via credencial</div>
     <div style="margin-bottom:8px;padding:6px 10px;background:#0d1430;border:1px solid #3a3050;border-radius:6px;font-size:10px;color:#ffd76a" id="stat-clientes">💎 0 Mamber · ✨ 0 ILU</div>
@@ -1829,7 +1829,7 @@ function leadsDoContexto(){
     if(q)    p.push('busca "'+q+'"');
     return {leads:getCloserFiltered(), titulo:'Closer', partes:p};
   }
-  // Aba Check-in
+  // Aba Check-in — a lateral segue o DIA selecionado (Dia 1 ou Dia 2)
   if(currentView==='cred'){
     const p=[];
     const cid=(document.getElementById('cred-cidade')||{}).value||'';
@@ -1840,7 +1840,10 @@ function leadsDoContexto(){
     p.push(tipo==='vip'?'só VIP':tipo==='normal'?'só Inscrito':'Inscrito + VIP');
     if(st)  p.push(st==='presente'?'com check-in':'aguardando check-in');
     if(q)   p.push('busca "'+q+'"');
-    return {leads:getCredFiltered(), titulo:'Check-in', partes:p};
+    const ev=eventoDoCheckin();
+    const dia=(ev&&ev.info.doisDias)?(diaCheckin===2?2:1):0;
+    if(dia) p.push('Dia '+dia);
+    return {leads:getCredFiltered(), titulo:'Check-in', partes:p, dia:dia};
   }
   // Aba VIP
   if(currentView==='vip'){
@@ -1898,7 +1901,17 @@ function renderStatsContexto(){
   const leads=ctx.leads||[];
   const total=somaPessoas(leads,pessoasDoLead);
   const conf=somaPessoas(leads,confirmadosDoLead);
-  const pres=somaPessoas(leads,presentesDoLead);
+  // Em evento de 2 dias, quando a aba é o Check-in, "presentes" mostra o DIA
+  // SELECIONADO — antes somava os dois dias e o número não mudava ao trocar
+  // de dia. Nas outras abas continua sendo quem apareceu em qualquer dia.
+  const dia = ctx.dia || 0;
+  const pres = dia
+    ? leads.reduce(function(s,l){
+        let n = presenteNoDia(l,dia) ? 1 : 0;
+        if (l.tipo==='VIP' && l.segundoNome && segundoPresenteNoDia(l,dia)) n += 1;
+        return s+n;
+      },0)
+    : somaPessoas(leads,presentesDoLead);
   const confCred=somaPessoas(leads.filter(l=>l.confCred&&l.confCred.toLowerCase().trim()==='sim'),pessoasDoLead);
   const pctC=total?Math.round(conf/total*100):0;
   const pctP=total?Math.round(pres/total*100):0;
@@ -1906,6 +1919,9 @@ function renderStatsContexto(){
   const elT=document.getElementById('stat-total'); if(elT) elT.textContent=total;
   const elC=document.getElementById('stat-conf');  if(elC) elC.textContent=conf;
   const elP=document.getElementById('stat-pres');  if(elP) elP.textContent=pres;
+  // deixa explícito de qual dia é o número de presentes
+  const elPL=document.getElementById('stat-pres-lbl');
+  if(elPL) elPL.textContent = dia ? ('presentes · Dia '+dia) : 'presentes';
   document.getElementById('pct-conf').textContent=pctC+'%';
   document.getElementById('pct-pres').textContent=pctP+'%';
   document.getElementById('bar-conf').style.width=pctC+'%';
@@ -4450,7 +4466,7 @@ function renderVendas(){
                (v.desconto?'<span class="v-tag desconto">% OFF</span>':'')+
                (!v.reserva&&!v.negociacao&&v.tag?'<span class="v-tag padrao">'+esc(v.tag)+'</span>':'');
     const notaTotal = v.origemTotal==='calculado' ? '<span class="v-calc-nota">calculado: '+brl(v.entrada)+' × '+v.parcelas+'</span>'
-      : v.origemTotal==='reserva' ? '<span class="v-calc-nota">sinal da reserva</span>'
+      : v.reserva && v.total===null ? '<span class="v-calc-nota">negociação em aberto</span>'
       : v.negociacao ? '<span class="v-calc-nota">valor negociado</span>' : '';
     const orTag = semAcento(v.origem).indexOf('inbound')>=0 ? '<span class="v-tag inbound">INBOUND</span>'
       : semAcento(v.origem).indexOf('evento')>=0 ? '<span class="v-tag evento">EVENTO</span>'
