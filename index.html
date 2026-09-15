@@ -4458,6 +4458,9 @@ function renderVendas(){
       badges+='<span class="tag" style="background:'+cor+'20;color:'+cor+';border:1px solid '+cor+'33;font-size:8px">'+esc(insc.abaKey)+'</span>';
       if(insc.presencial==='Sim') badges+='<span class="pres-badge sim" style="font-size:8px">✓ Presente</span>';
       if(clientInfo(insc).mdl==='Ativo') badges+='<span class="badge-mamber ativo" style="font-size:8px">💎 Mamber</span>';
+    } else if (v.abaEvento && !eventoAtivo(v.abaEvento) && !temPassadosCarregados) {
+      // o dash carrega só os eventos ativos — não é que a pessoa não exista
+      badges+='<span class="v-tag padrao">evento passado · clique em "eventos passados" para cruzar</span>';
     } else {
       badges+='<span class="v-tag padrao">não achei na lista de inscritos</span>';
     }
