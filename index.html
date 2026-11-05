@@ -1136,10 +1136,14 @@ function apiChamar(acao, args, extra){
     body: JSON.stringify(corpo),
     redirect: 'follow',
   }).then(function(r){ return r.json(); })
-    .catch(function(){ return apiJsonp(acao, args, extra); });   // plano B
+    .catch(function(){
+      // Login nunca vai pela URL: senha em URL fica em histórico e logs.
+      if (acao === 'login') throw new Error('Não consegui falar com o servidor. Tente de novo.');
+      return apiJsonp(acao, args);
+    });   // plano B
 }
 // Plano B: JSONP (nunca esbarra em CORS). Usado se o fetch falhar.
-function apiJsonp(acao, args, extra){
+function apiJsonp(acao, args){
   return new Promise(function(resolve, reject){
     const cb = 'otrcb_' + Math.random().toString(36).slice(2);
     const limpar = function(){ try{ delete window[cb]; s.remove(); }catch(e){} };
@@ -1147,7 +1151,6 @@ function apiJsonp(acao, args, extra){
     let url = API_URL + '?acao=' + encodeURIComponent(acao) + '&callback=' + cb +
               '&token=' + encodeURIComponent(sessaoToken || '') +
               '&args=' + encodeURIComponent(JSON.stringify(args || []));
-    if (extra && extra.email) url += '&email=' + encodeURIComponent(extra.email) + '&senha=' + encodeURIComponent(extra.senha || '');
     const s = document.createElement('script');
     s.src = url;
     s.onerror = function(){ limpar(); reject(new Error('Não consegui falar com o servidor.')); };
